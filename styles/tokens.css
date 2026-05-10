@@ -1,0 +1,140 @@
+/* Design tokens — the only place values are *defined*.
+   Light is the default. Dark applies via prefers-color-scheme.
+   [data-theme="light"|"dark"] overrides the system preference when
+   the user has explicitly chosen via the theme toggle. */
+
+:root {
+  /* Color — role-named */
+  --bg-base: #f7f4ef;
+  --bg-raised: #edeae4;
+  --bg-overlay: #e4e0d8;
+
+  --text-primary: #1c1916;
+  --text-muted: #6b6560;
+  --text-subtle: #645e59;
+
+  --accent-brand: #7e5828;
+  --accent-brand-soft: rgba(126, 88, 40, 0.05);
+
+  --border-subtle: rgba(28, 25, 22, 0.1);
+  --border-accent: rgba(126, 88, 40, 0.3);
+
+  --focus-ring: var(--accent-brand);
+  --focus-ring-offset: var(--bg-base);
+
+  --vignette: rgba(247, 244, 239, 0.5);
+  --dot-color: rgba(126, 88, 40, 0.07);
+
+  /* Profiler — always-dark, scoped tokens. The profiler is a developer
+     surface and reads best with a constant dark palette regardless of
+     the page theme. */
+  --prof-bg: #0a0908;
+  --prof-bg-raised: #111009;
+  --prof-bg-overlay: #181510;
+  --prof-text: rgba(226, 221, 213, 0.85);
+  --prof-muted: rgba(226, 221, 213, 0.6);
+  --prof-subtle: rgba(226, 221, 213, 0.4);
+  --prof-border: rgba(196, 160, 106, 0.15);
+  --prof-border-strong: rgba(196, 160, 106, 0.4);
+  --prof-track: rgba(255, 255, 255, 0.06);
+  --prof-accent: #c4a06a;
+  --prof-good: #4caf78;
+  --prof-warn: #e6a83a;
+  --prof-bad: #e05c5c;
+  --prof-good-soft: rgba(76, 175, 120, 0.12);
+  --prof-good-border: rgba(76, 175, 120, 0.2);
+  --prof-warn-soft: rgba(230, 168, 58, 0.12);
+  --prof-warn-border: rgba(230, 168, 58, 0.2);
+  --prof-bad-soft: rgba(224, 92, 92, 0.12);
+  --prof-bad-border: rgba(224, 92, 92, 0.2);
+
+  /* Spacing — 4px base scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 9999px;
+
+  /* Typography */
+  --font-body: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: ui-serif, Georgia, 'Times New Roman', serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 24px;
+  --text-2xl: 32px;
+  --text-display: clamp(56px, 8vw, 84px);
+
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+  --leading-loose: 1.75;
+
+  --weight-light: 300;
+  --weight-regular: 400;
+  --weight-medium: 500;
+
+  /* Motion */
+  --motion-duration-fast: 150ms;
+  --motion-duration-slow: 300ms;
+  --motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Shadow */
+  --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.6);
+
+  /* Z-index — small documented scale */
+  --z-base: 0;
+  --z-elevated: 10;
+  --z-fixed-chrome: 100;
+  --z-profiler: 200;
+
+  /* Profiler layout — referenced from home.css gutter and profiler.css width */
+  --profiler-width: 440px;
+  --profiler-strip-block-size: 64px;
+}
+
+/* Light is the unconditional default — `prefers-color-scheme: dark` is
+   intentionally NOT honored. See memory/feedback_default_theme.md. Dark
+   mode applies only when the theme toggle sets [data-theme="dark"]. */
+
+[data-theme="light"] {
+  --bg-base: #f7f4ef;
+  --bg-raised: #edeae4;
+  --bg-overlay: #e4e0d8;
+  --text-primary: #1c1916;
+  --text-muted: #6b6560;
+  --text-subtle: #645e59;
+  --accent-brand: #7e5828;
+  --accent-brand-soft: rgba(126, 88, 40, 0.05);
+  --border-subtle: rgba(28, 25, 22, 0.1);
+  --border-accent: rgba(126, 88, 40, 0.3);
+  --vignette: rgba(247, 244, 239, 0.5);
+  --dot-color: rgba(126, 88, 40, 0.07);
+}
+
+[data-theme="dark"] {
+  --bg-base: #0e0d0b;
+  --bg-raised: #161410;
+  --bg-overlay: #1e1b17;
+  --text-primary: #e2ddd5;
+  --text-muted: #8a8278;
+  --text-subtle: #93897e;
+  --accent-brand: #c4a06a;
+  --accent-brand-soft: rgba(196, 160, 106, 0.06);
+  --border-subtle: rgba(226, 221, 213, 0.07);
+  --border-accent: rgba(196, 160, 106, 0.25);
+  --vignette: rgba(14, 13, 11, 0.7);
+  --dot-color: rgba(196, 160, 106, 0.08);
+}
