@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+
+  <!-- Strict CSP. style-src-attr 'unsafe-inline' is relaxed only for the
+       style attribute so profiler.js can hand off dynamic bar widths via
+       element.style.setProperty('--bar-pct', …). The underlying CSS rules
+       still live in stylesheets, per css.md. style-src 'self' still blocks
+       inline <style> blocks; script-src is fully strict.
+       frame-ancestors is intentionally absent: it can only be enforced via
+       an HTTP response header, not a meta tag (browsers ignore it here and
+       log a console warning). When hosting moves to a header-capable
+       platform, add `frame-ancestors 'none'` there. -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self';
+    style-src 'self';
+    style-src-attr 'unsafe-inline';
+    img-src 'self' data:;
+    font-src 'self';
+    connect-src 'self';
+    base-uri 'self';
+    form-action 'self';
+  ">
+
+  <title>Jeff Arn — Engineering Manager — jeffarn.com</title>
+  <meta name="description" content="Engineering Manager at Meta on Messenger infrastructure. 13 years building large-scale distributed systems. Writes at Technical Doodles.">
+  <meta name="author" content="Jeff Arn">
+  <link rel="canonical" href="https://jeffarn.com/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Jeff Arn — Engineering Manager">
+  <meta property="og:description" content="Engineering Manager at Meta on Messenger infrastructure. 13 years building large-scale distributed systems. Writes at Technical Doodles.">
+  <meta property="og:url" content="https://jeffarn.com/">
+  <meta property="og:site_name" content="Jeff Arn">
+  <meta property="og:image" content="https://jeffarn.com/assets/og/home.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Jeff Arn — Engineering Manager — jeffarn.com">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Jeff Arn — Engineering Manager">
+  <meta name="twitter:description" content="Engineering Manager at Meta on Messenger infrastructure. 13 years building large-scale distributed systems.">
+  <meta name="twitter:image" content="https://jeffarn.com/assets/og/home.png">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Jeff Arn",
+    "url": "https://jeffarn.com",
+    "jobTitle": "Engineering Manager",
+    "worksFor": { "@type": "Organization", "name": "Meta" },
+    "description": "Engineering Manager at Meta on Messenger infrastructure. 13 years building large-scale distributed systems and real-time messaging platforms.",
+    "sameAs": [
+      "https://linkedin.com/in/jeffreytarn",
+      "https://github.com/jeff-arn",
+      "https://technicaldoodles.substack.com"
+    ],
+    "knowsAbout": [
+      "Distributed Systems",
+      "Real-Time Messaging",
+      "Messaging Infrastructure",
+      "Engineering Management",
+      "Platform Engineering",
+      "Pub/Sub Systems"
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="/styles/tokens.css">
+  <link rel="stylesheet" href="/styles/base.css">
+  <link rel="stylesheet" href="/styles/home.css">
+  <!-- profiler.css is injected by scripts/profiler.js on boot — taking
+       it off the critical path. The aside is hidden until JS reveals it,
+       so the lazy load has no visual cost. -->
+
+
+  <script type="module" defer src="/scripts/theme.js"></script>
+  <script type="module" defer src="/scripts/profiler.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <aside hidden id="profiler" class="profiler" aria-label="Profiler">
+    <button type="button" id="profiler-toggle" class="profiler-summary"
+            aria-controls="profiler-body" aria-expanded="false">
+      <span class="profiler-dot" aria-hidden="true"></span>
+      <span class="profiler-title">Profiler</span>
+      <span id="profiler-load-time" class="profiler-load-time">…</span>
+      <span class="profiler-chevron" aria-hidden="true">▾</span>
+    </button>
+
+    <div id="profiler-body" class="profiler-body" hidden>
+      <div class="profiler-tabs" role="tablist" aria-label="Profiler sections">
+        <button role="tab" type="button" id="prof-tab-load"
+                aria-controls="prof-pane-load" aria-selected="true" tabindex="0">Load</button>
+        <button role="tab" type="button" id="prof-tab-runtime"
+                aria-controls="prof-pane-runtime" aria-selected="false" tabindex="-1">Runtime</button>
+      </div>
+
+      <div role="tabpanel" id="prof-pane-load" aria-labelledby="prof-tab-load">
+        <div class="prof-stats">
+          <div class="prof-stat">
+            <div class="prof-stat-label">Load</div>
+            <div class="prof-stat-value" id="prof-stat-load">—<span class="prof-stat-unit">ms</span></div>
+          </div>
+          <div class="prof-stat">
+            <div class="prof-stat-label">TTFB</div>
+            <div class="prof-stat-value" id="prof-stat-ttfb">—<span class="prof-stat-unit">ms</span></div>
+          </div>
+          <div class="prof-stat">
+            <div class="prof-stat-label">Visits</div>
+            <div class="prof-stat-value" id="prof-stat-visits">—</div>
+          </div>
+        </div>
+
+        <hr class="prof-divider">
+
+        <div>
+          <h3 class="prof-section-title">Page load trace — this request</h3>
+          <div class="prof-waterfall" id="prof-waterfall"></div>
+        </div>
+
+        <hr class="prof-divider">
+
+        <div>
+          <h3 class="prof-section-title">Load time — your visit history</h3>
+          <div class="prof-percs" id="prof-percs"></div>
+          <div class="prof-perc-note" id="prof-perc-note"></div>
+        </div>
+
+        <hr class="prof-divider">
+
+        <div>
+          <h3 class="prof-section-title">SLO: p99 load &lt; 1000ms</h3>
+          <div class="prof-slo-row">
+            <span class="prof-slo-label" id="prof-slo-label">computing…</span>
+            <div class="prof-slo-bar-wrap"><div class="prof-slo-bar" id="prof-slo-bar"></div></div>
+            <span class="prof-slo-pct" id="prof-slo-pct">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div role="tabpanel" id="prof-pane-runtime" aria-labelledby="prof-tab-runtime" hidden>
+        <div>
+          <h3 class="prof-section-title">Frame rate — live</h3>
+          <div class="prof-rt-stats">
+            <div class="prof-rt-stat">
+              <div class="prof-rt-stat-label">Current</div>
+              <div class="prof-rt-stat-value" id="prof-rt-fps-cur">—</div>
+            </div>
+            <div class="prof-rt-stat">
+              <div class="prof-rt-stat-label">Min</div>
+              <div class="prof-rt-stat-value" id="prof-rt-fps-min">—</div>
+            </div>
+            <div class="prof-rt-stat">
+              <div class="prof-rt-stat-label">Dropped</div>
+              <div class="prof-rt-stat-value" id="prof-rt-dropped">0</div>
+            </div>
+            <div class="prof-rt-stat">
+              <div class="prof-rt-stat-label">Budget</div>
+              <div class="prof-rt-stat-value prof-rt-stat-value--subtle">16ms</div>
+            </div>
+          </div>
+          <canvas id="prof-fps-canvas" aria-label="Frame time sparkline"></canvas>
+          <div class="prof-spark-legend">
+            <span>← older</span>
+            <span>60fps budget = 16.67ms</span>
+            <span>newer →</span>
+          </div>
+        </div>
+
+        <hr class="prof-divider">
+
+        <div>
+          <h3 class="prof-section-title">Long animation frames (&gt;50ms)</h3>
+          <div class="prof-rt-metric-row">
+            <div class="prof-rt-metric-left">
+              <span class="prof-rt-metric-name">Total detected</span>
+              <span class="prof-rt-metric-sub">via PerformanceObserver long-animation-frame</span>
+            </div>
+            <span class="prof-rt-metric-val prof-good" id="prof-rt-laf-count">0</span>
+          </div>
+          <div class="prof-rt-metric-row">
+            <div class="prof-rt-metric-left">
+              <span class="prof-rt-metric-name">Worst frame</span>
+              <span class="prof-rt-metric-sub">blocking duration on main thread</span>
+            </div>
+            <span class="prof-rt-metric-val" id="prof-rt-laf-worst">—</span>
+          </div>
+        </div>
+
+        <hr class="prof-divider">
+
+        <div>
+          <h3 class="prof-section-title">Scroll hitch</h3>
+          <div class="prof-rt-metric-row">
+            <div class="prof-rt-metric-left">
+              <span class="prof-rt-metric-name">Hitches detected</span>
+              <span class="prof-rt-metric-sub">scroll event lag &gt; 2 frames (33ms)</span>
+            </div>
+            <span class="prof-rt-metric-val prof-good" id="prof-rt-hitches">0</span>
+          </div>
+          <div class="prof-rt-scroll-hint" id="prof-rt-scroll-hint">scroll the page to measure</div>
+        </div>
+
+        <hr class="prof-divider">
+
+        <div>
+          <h3 class="prof-section-title">Layout stability</h3>
+          <div class="prof-cls-row">
+            <span class="prof-cls-score" id="prof-rt-cls">0.000</span>
+            <span class="prof-cls-badge" id="prof-rt-cls-badge">good</span>
+            <span class="prof-cls-caption">CLS score</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main id="main" class="wrapper">
+    <button hidden type="button" id="theme-toggle" class="theme-toggle"
+            aria-label="Toggle color theme: dark, light" aria-pressed="false">
+      <span class="theme-toggle-opt" data-theme-opt="dark">dark</span>
+      <span class="theme-toggle-opt" data-theme-opt="light">light</span>
+    </button>
+
+    <header class="page-header">
+      <p class="eyebrow">jeffarn.com<span class="cursor" aria-hidden="true"></span></p>
+      <h1>Jeff <em>Arn</em></h1>
+      <p class="bio">
+        Engineering Manager at <strong>Meta</strong> on Messenger infrastructure.
+        13 years building large-scale distributed systems; previously at IBM
+        on developer platforms and AI systems.
+      </p>
+    </header>
+
+    <nav class="links" aria-label="Profiles">
+      <a class="link-card" href="https://linkedin.com/in/jeffreytarn" target="_blank" rel="noopener noreferrer">
+        <span class="link-label">Work</span>
+        <span class="link-title">LinkedIn</span>
+        <span class="link-sub">jeffreytarn</span>
+        <span class="link-arrow" aria-hidden="true">↗</span>
+      </a>
+      <a class="link-card" href="https://github.com/jeff-arn" target="_blank" rel="noopener noreferrer">
+        <span class="link-label">Code</span>
+        <span class="link-title">GitHub</span>
+        <span class="link-sub">jeff-arn</span>
+        <span class="link-arrow" aria-hidden="true">↗</span>
+      </a>
+      <a class="link-card" href="https://technicaldoodles.substack.com" target="_blank" rel="noopener noreferrer">
+        <span class="link-label">Writing</span>
+        <span class="link-title">Technical Doodles</span>
+        <span class="link-sub">Substack</span>
+        <span class="link-arrow" aria-hidden="true">↗</span>
+      </a>
+    </nav>
+
+    <hr class="divider">
+
+    <section class="section" aria-labelledby="building-heading">
+      <h2 id="building-heading" class="section-label">What I'm building</h2>
+      <article class="building-block">
+        <p class="building-title">// current project</p>
+        <p class="building-desc">
+          A <strong>full stack for a TCG deck builder</strong> featuring a Rust backend,
+          web interface, Android/iOS native applications. Developing using AI-native best practices
+          to blend speed of execution and engineering quality.
+        </p>
+        <ul class="building-tags" aria-label="Technologies">
+          <li class="tag">Rust</li>
+          <li class="tag">web apps</li>
+          <li class="tag">AI-native engineering</li>
+          <li class="tag">user interfaces</li>
+        </ul>
+      </article>
+      <article class="building-block">
+        <p class="building-title">// current project</p>
+        <p class="building-desc">
+          A <strong>vanilla WoW private server</strong> using VMaNGOS, with a bot
+          system that simulates a full party. The goal is a solo-playable version
+          of 2005-era World of Warcraft with decent AI companions.
+        </p>
+        <ul class="building-tags" aria-label="Technologies">
+          <li class="tag">C++</li>
+          <li class="tag">netcode</li>
+          <li class="tag">game AI</li>
+          <li class="tag">bot systems</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="section" aria-labelledby="writing-heading">
+      <h2 id="writing-heading" class="section-label">Latest writing</h2>
+      <ul class="writing-list">
+        <li>
+          <a class="writing-item" href="https://technicaldoodles.substack.com/p/the-year-i-spent-building-something" target="_blank" rel="noopener noreferrer">
+            <span class="writing-item-left">
+              <span class="writing-title">The Year I Spent Building Something That Didn't Work</span>
+              <span class="writing-source">Technical Doodles</span>
+            </span>
+            <span class="writing-date">May 2026</span>
+          </a>
+        </li>
+        <li>
+          <a class="writing-item" href="https://technicaldoodles.substack.com/p/simulated-combat-bots-in-vanilla" target="_blank" rel="noopener noreferrer">
+            <span class="writing-item-left">
+              <span class="writing-title">Simulated Combat Bots in Vanilla WoW</span>
+              <span class="writing-source">Technical Doodles</span>
+            </span>
+            <span class="writing-date">Apr 2026</span>
+          </a>
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="wrapper page-footer">
+    <p class="footer-name">Jeff Arn</p>
+    <p class="footer-loc">New York City</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,567 @@
+/* Profiler aside. Same markup serves both layouts:
+   - Mobile (< 768px): bottom-anchored strip; tap to expand into a sheet
+     that takes ≤ 60vh, leaving the upper viewport scrollable.
+   - Desktop (≥ 768px): full-viewport-height aside flush against the
+     right edge. Always visible; the summary acts as a non-interactive
+     header (no expand/collapse on desktop).
+   The palette is always-dark regardless of page theme — see prof-* tokens
+   in tokens.css. */
+
+/* Defensive: .profiler { display: flex } below has the same specificity
+   as the UA rule [hidden] { display: none }, so author cascade would win
+   and a `hidden` aside would still render. Re-assert hidden here. */
+.profiler[hidden] {
+  display: none;
+}
+
+.profiler {
+  position: fixed;
+  z-index: var(--z-profiler);
+  background: var(--prof-bg);
+  border: 1px solid var(--prof-border);
+  color: var(--prof-text);
+  font-family: var(--font-mono);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-md);
+
+  /* Mobile defaults: full-width strip pinned to the bottom. */
+  inset-block-end: 0;
+  inset-inline: 0;
+  border-inline: none;
+  border-block-end: none;
+  max-block-size: 60vh;
+}
+
+@media (min-width: 768px) {
+  .profiler {
+    /* Desktop: flush to the right edge of the viewport, full height.
+       Shadow is small and inline-start-only — only the left edge faces
+       the page, and a wide bloom would project over the theme toggle in
+       the gutter. */
+    inset-block: 0;
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+    inline-size: var(--profiler-width);
+    border: none;
+    border-inline-start: 1px solid var(--prof-border);
+    box-shadow: -2px 0 12px rgba(0, 0, 0, 0.4);
+    max-block-size: none;
+  }
+}
+
+/* Summary strip — always visible. On mobile this is the only thing
+   visible by default and doubles as the expand/collapse trigger. On
+   desktop it's a static header — the click is a no-op (handled in JS)
+   and the chevron is hidden. */
+.profiler-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-6);
+  background: transparent;
+  border: none;
+  border-block-end: 1px solid var(--prof-border);
+  color: inherit;
+  font-family: inherit;
+  cursor: pointer;
+  inline-size: 100%;
+  text-align: start;
+  min-block-size: var(--profiler-strip-block-size);
+  transition: background var(--motion-duration-fast);
+}
+
+.profiler-summary:hover {
+  background: var(--prof-bg-raised);
+}
+
+@media (min-width: 768px) {
+  .profiler-summary {
+    cursor: default;
+  }
+  .profiler-summary:hover {
+    background: transparent;
+  }
+}
+
+.profiler-dot {
+  inline-size: 10px;
+  block-size: 10px;
+  border-radius: 50%;
+  background: var(--prof-good);
+  box-shadow: 0 0 8px var(--prof-good);
+  flex-shrink: 0;
+  animation: prof-pulse 2.4s ease-in-out infinite;
+}
+
+.profiler-dot[data-state="warn"] {
+  background: var(--prof-warn);
+  box-shadow: 0 0 8px var(--prof-warn);
+}
+
+.profiler-dot[data-state="bad"] {
+  background: var(--prof-bad);
+  box-shadow: 0 0 8px var(--prof-bad);
+}
+
+@keyframes prof-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.profiler-title {
+  font-size: var(--text-sm);
+  letter-spacing: 0.1em;
+  color: var(--prof-muted);
+  text-transform: uppercase;
+  flex: 1;
+}
+
+.profiler-load-time {
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--prof-good);
+  min-inline-size: 56px;
+  text-align: end;
+}
+
+.profiler-load-time[data-state="warn"] { color: var(--prof-warn); }
+.profiler-load-time[data-state="bad"] { color: var(--prof-bad); }
+
+.profiler-chevron {
+  color: var(--prof-muted);
+  font-size: var(--text-base);
+  transition: transform var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+.profiler-summary[aria-expanded="true"] .profiler-chevron {
+  transform: rotate(180deg);
+}
+
+@media (min-width: 768px) {
+  .profiler-chevron {
+    display: none;
+  }
+}
+
+/* Body — collapses on mobile when the summary's aria-expanded is false.
+   On desktop the body is always visible (JS forces aria-expanded=true at
+   that breakpoint and the click is a no-op). */
+.profiler-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+.profiler-body[hidden] {
+  display: none;
+}
+
+/* Tabs — WAI-ARIA tab pattern */
+.profiler-tabs {
+  display: flex;
+  border-block-end: 1px solid var(--prof-border);
+  flex-shrink: 0;
+}
+
+.profiler-tabs [role="tab"] {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: var(--space-3) var(--space-6);
+  cursor: pointer;
+  color: var(--prof-muted);
+  background: transparent;
+  border: none;
+  border-block-end: 2px solid transparent;
+  transition: color var(--motion-duration-fast),
+              border-color var(--motion-duration-fast);
+  margin-block-end: -1px;
+  user-select: none;
+}
+
+.profiler-tabs [role="tab"]:hover {
+  color: var(--prof-text);
+}
+
+.profiler-tabs [role="tab"][aria-selected="true"] {
+  color: var(--prof-accent);
+  border-block-end-color: var(--prof-accent);
+}
+
+[role="tabpanel"] {
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  overflow-y: auto;
+  flex: 1;
+  min-block-size: 0;
+}
+
+[role="tabpanel"][hidden] {
+  display: none;
+}
+
+/* Section titles inside panes */
+.prof-section-title {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--prof-muted);
+  margin-block-end: var(--space-3);
+  font-weight: var(--weight-regular);
+}
+
+.prof-divider {
+  block-size: 1px;
+  background: var(--prof-border);
+  border: none;
+}
+
+/* Stat tiles */
+.prof-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+}
+
+.prof-stat {
+  background: var(--prof-bg-raised);
+  border: 1px solid var(--prof-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+}
+
+.prof-stat-label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--prof-muted);
+  margin-block-end: var(--space-2);
+}
+
+.prof-stat-value {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-medium);
+  color: var(--prof-text);
+}
+
+.prof-stat-unit {
+  font-size: var(--text-xs);
+  color: var(--prof-muted);
+  margin-inline-start: 2px;
+}
+
+/* Waterfall */
+.prof-waterfall {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.prof-wf-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.prof-wf-label {
+  font-size: var(--text-xs);
+  color: var(--prof-text);
+  inline-size: 110px;
+  flex-shrink: 0;
+  text-align: end;
+}
+
+.prof-wf-track {
+  flex: 1;
+  block-size: 8px;
+  background: var(--prof-track);
+  border-radius: var(--radius-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Dynamic bar width comes through a custom property set by JS. The value
+   `--bar-pct` is the only runtime-dynamic input; the property declaration
+   itself stays in the stylesheet. */
+.prof-wf-bar {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: var(--bar-pct, 0%);
+  border-radius: var(--radius-sm);
+  transition: inline-size 0.6s var(--motion-ease-out);
+}
+
+.prof-wf-val {
+  font-size: var(--text-xs);
+  inline-size: 60px;
+  text-align: end;
+  flex-shrink: 0;
+}
+
+.prof-wf-val-unit {
+  font-size: var(--text-xs);
+  color: var(--prof-muted);
+  margin-inline-start: 2px;
+}
+
+/* Percentiles */
+.prof-percs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.prof-perc-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.prof-perc-label {
+  font-size: var(--text-xs);
+  color: var(--prof-muted);
+  inline-size: 48px;
+  flex-shrink: 0;
+}
+
+.prof-perc-track {
+  flex: 1;
+  block-size: 6px;
+  background: var(--prof-track);
+  border-radius: var(--radius-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.prof-perc-fill {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: var(--bar-pct, 0%);
+  border-radius: var(--radius-sm);
+  background: var(--prof-accent);
+  opacity: 0.5;
+  transition: inline-size 0.7s var(--motion-ease-out);
+}
+
+.prof-perc-val {
+  font-size: var(--text-xs);
+  color: var(--prof-text);
+  inline-size: 60px;
+  text-align: end;
+  flex-shrink: 0;
+}
+
+.prof-perc-note {
+  font-size: var(--text-xs);
+  color: var(--prof-muted);
+  text-align: center;
+  margin-block-start: var(--space-2);
+}
+
+/* SLO */
+.prof-slo-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.prof-slo-label {
+  font-size: var(--text-xs);
+  color: var(--prof-muted);
+}
+
+.prof-slo-bar-wrap {
+  flex: 1;
+  block-size: 6px;
+  background: var(--prof-track);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.prof-slo-bar {
+  block-size: 100%;
+  inline-size: var(--bar-pct, 0%);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--prof-good), #7ed4a0);
+  transition: inline-size 0.8s var(--motion-ease-out);
+}
+
+.prof-slo-bar[data-state="warn"] {
+  background: linear-gradient(90deg, var(--prof-warn), #f0c060);
+}
+
+.prof-slo-bar[data-state="bad"] {
+  background: linear-gradient(90deg, var(--prof-bad), #f07070);
+}
+
+.prof-slo-pct {
+  font-size: var(--text-xs);
+  color: var(--prof-good);
+  inline-size: 48px;
+  text-align: end;
+  flex-shrink: 0;
+}
+
+.prof-slo-pct[data-state="warn"] { color: var(--prof-warn); }
+.prof-slo-pct[data-state="bad"] { color: var(--prof-bad); }
+
+/* Runtime tab */
+.prof-rt-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+}
+
+.prof-rt-stat {
+  background: var(--prof-bg-raised);
+  border: 1px solid var(--prof-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+}
+
+.prof-rt-stat-label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--prof-muted);
+  margin-block-end: var(--space-1);
+}
+
+.prof-rt-stat-value {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-medium);
+  color: var(--prof-text);
+}
+
+.prof-rt-stat-value--subtle {
+  color: var(--prof-muted);
+}
+
+#prof-fps-canvas {
+  inline-size: 100%;
+  block-size: 72px;
+  border-radius: var(--radius-sm);
+  background: var(--prof-bg-raised);
+  border: 1px solid var(--prof-border);
+  display: block;
+  margin-block-start: var(--space-3);
+}
+
+.prof-spark-legend {
+  display: flex;
+  justify-content: space-between;
+  margin-block-start: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--prof-muted);
+}
+
+.prof-rt-metric-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.prof-rt-metric-row + .prof-rt-metric-row {
+  margin-block-start: var(--space-3);
+}
+
+.prof-rt-metric-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.prof-rt-metric-name {
+  font-size: var(--text-sm);
+  color: var(--prof-text);
+}
+
+.prof-rt-metric-sub {
+  font-size: var(--text-xs);
+  color: var(--prof-muted);
+}
+
+.prof-rt-metric-val {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-medium);
+}
+
+.prof-rt-metric-val-unit {
+  font-size: var(--text-sm);
+  color: var(--prof-muted);
+  margin-inline-start: 2px;
+}
+
+.prof-rt-scroll-hint {
+  margin-block-start: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--prof-muted);
+}
+
+.prof-rt-scroll-hint[hidden] {
+  display: none;
+}
+
+/* CLS */
+.prof-cls-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.prof-cls-score {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-medium);
+}
+
+.prof-cls-badge {
+  font-size: var(--text-xs);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--prof-good-soft);
+  border: 1px solid var(--prof-good-border);
+  color: var(--prof-good);
+}
+
+.prof-cls-badge[data-state="warn"] {
+  background: var(--prof-warn-soft);
+  border-color: var(--prof-warn-border);
+  color: var(--prof-warn);
+}
+
+.prof-cls-badge[data-state="bad"] {
+  background: var(--prof-bad-soft);
+  border-color: var(--prof-bad-border);
+  color: var(--prof-bad);
+}
+
+.prof-cls-caption {
+  font-size: var(--text-xs);
+  color: var(--prof-muted);
+  margin-inline-start: auto;
+}
+
+/* Status colors — applied via data-state on metric values */
+.prof-good { color: var(--prof-good); }
+.prof-warn { color: var(--prof-warn); }
+.prof-bad { color: var(--prof-bad); }
+
+[data-state="good"] { color: var(--prof-good); }
+[data-state="warn"] { color: var(--prof-warn); }
+[data-state="bad"] { color: var(--prof-bad); }
+
+/* Bar fills (waterfall) — class-driven for the discrete good/warn/bad cases. */
+.prof-wf-bar[data-state="good"] { background: var(--prof-good); }
+.prof-wf-bar[data-state="warn"] { background: var(--prof-warn); }
+.prof-wf-bar[data-state="bad"] { background: var(--prof-bad); }
