@@ -26,7 +26,7 @@ Use one of:
 - `fix` — a bug fix
 - `perf` — a performance improvement that is neither a feature nor a fix
 - `refactor` — a code change that neither fixes a bug nor adds a feature
-- `docs` — documentation only (including `README.md`, `CLAUDE.md`, `.claude/rules/*`)
+- `docs` — documentation only (including `README.md`, `AGENTS.md`, `.agents/rules/*`)
 - `style` — formatting, whitespace, no logic change
 - `test` — adding or correcting tests
 - `build` — changes to deployment, packaging, or build config (e.g. a future GitHub Action)
@@ -51,12 +51,12 @@ Scope is a noun in parentheses naming the area touched: page, layer, or area of 
 - `a11y` — accessibility-only fixes (focus rings, contrast, ARIA)
 - `perf` — performance-only fixes (the *type* is also `perf`; use the *scope* when you want to be specific)
 - `meta` — repo-level metadata (`README.md`, `LICENSE`, `.gitignore`, `CNAME`)
-- `claude` — `CLAUDE.md` or `.claude/rules/` updates
+- `agents` — `AGENTS.md` or `.agents/rules/` updates
 
 ```
 feat(home): add featured-projects section
 fix(a11y): restore focus to trigger on dialog close
-docs(claude): add seo.md and tighten progressive-enhancement framing
+docs(agents): add seo.md and tighten progressive-enhancement framing
 ```
 
 Don't invent new vocabulary per commit. If your scope doesn't fit any of the above and the change isn't trivial, propose adding it to this list in the same commit.
@@ -121,7 +121,7 @@ Good:
 feat(home): add featured-projects section
 fix(a11y): give icon-only nav links visible labels for screen readers
 refactor(styles): split base.css out of index.css
-docs(claude): bootstrap CLAUDE.md and rules files
+docs(agents): bootstrap AGENTS.md and rules files
 chore(meta): add CNAME for jeffarn.com
 ci: add Lighthouse CI on pull requests
 perf(assets): convert hero image to AVIF with WebP fallback

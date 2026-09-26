@@ -42,7 +42,7 @@ python3 -m http.server 8000
 
 ## Conventions
 
-Project conventions and hard requirements (WCAG 2.1 AA, strict CSP, Conventional Commits, performance budgets) live in [`CLAUDE.md`](CLAUDE.md) and [`.claude/rules/`](.claude/rules/).
+Project conventions and hard requirements (WCAG 2.1 AA, strict CSP, Conventional Commits, performance budgets) live in [`AGENTS.md`](AGENTS.md) and [`.agents/rules/`](.agents/rules/).
 
 ## License
 

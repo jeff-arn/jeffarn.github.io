@@ -6,7 +6,7 @@ Static-site security posture. Lighter than a full-stack app's security file beca
 
 - **No secrets in this repo, ever.** No API keys, no tokens, no service credentials, not even "public" ones — anything that looks like a token is treated as a bug, even when the value is technically meant to be public, because intent is hard to recover from a git log.
 - **`.gitignore`** covers any local-only files (`.env`, OS junk like `.DS_Store`, editor scratch).
-- If the site someday integrates with a third party that requires a public client key (e.g. a "site verification" tag from Google Search Console, a Plausible site key, etc.), document the value in `CLAUDE.md` or this file with a one-line note explaining why it's public-by-design.
+- If the site someday integrates with a third party that requires a public client key (e.g. a "site verification" tag from Google Search Console, a Plausible site key, etc.), document the value in `AGENTS.md` or this file with a one-line note explaining why it's public-by-design.
 - A future improvement is to add `gitleaks` or a similar secret scanner to a pre-commit hook, mirroring the pattern from Jeff's other repos. Not in scope for the initial bootstrap.
 
 ## Content Security Policy

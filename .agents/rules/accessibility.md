@@ -68,7 +68,7 @@ A personal site that doesn't work for keyboard users, screen-reader users, or us
 - **axe DevTools** on every changed page. Zero violations is the bar. If a rule must be suppressed, the suppression is annotated in code with the rule ID, the reason, and a follow-up.
 - **Manual keyboard pass** before merging anything user-facing. Tab through it. Hit Enter on every actionable element. Hit Esc in every modal. Close the laptop and reopen it — focus should land somewhere sensible.
 - **Manual screen-reader pass** for new flows: VoiceOver on macOS or iOS is the minimum. Not on every commit, but before any milestone-shaped change.
-- **Lighthouse Accessibility ≥ 95** on the changed page (cross-ref `CLAUDE.md` definition of done).
+- **Lighthouse Accessibility ≥ 95** on the changed page (cross-ref `AGENTS.md` definition of done).
 
 ## What we don't do
 

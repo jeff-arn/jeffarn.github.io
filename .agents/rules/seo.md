@@ -104,6 +104,6 @@ Add JSON-LD in a `<script type="application/ld+json">` block where it adds clari
 ## Verification
 
 - **[Google Rich Results Test](https://search.google.com/test/rich-results)** for any page that ships JSON-LD.
-- **[Lighthouse SEO](https://developer.chrome.com/docs/lighthouse/seo/) score ≥ 95** on every changed page (cross-ref `CLAUDE.md` definition of done).
+- **[Lighthouse SEO](https://developer.chrome.com/docs/lighthouse/seo/) score ≥ 95** on every changed page (cross-ref `AGENTS.md` definition of done).
 - **[Open Graph debugger](https://www.opengraph.xyz/) and [Twitter Card validator](https://cards-dev.twitter.com/validator)** when OG metadata changes — preview crawlers cache aggressively, so verify on a deployed URL, not localhost.
 - **Google Search Console** ownership for the domain (one-time setup), and a periodic glance at the Pages and Performance reports — not on every commit, but monthly is reasonable.
